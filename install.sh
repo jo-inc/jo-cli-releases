@@ -7,20 +7,12 @@ INSTALL_DIR="${JO_INSTALL_DIR:-$HOME/.local/share/jo-cli}"
 BIN_DIR="${JO_BIN_DIR:-$HOME/.local/bin}"
 
 if [ "$VERSION" = "latest" ]; then
-  RELEASE_PATH="latest/download"
   DISPLAY_VERSION="latest"
 else
-  RELEASE_PATH="download/v$VERSION"
   DISPLAY_VERSION="$VERSION"
 fi
 
 TARBALL="jo-cli-${VERSION}.tar.gz"
-if [ "$VERSION" = "latest" ]; then
-  TARBALL="jo-cli-latest.tar.gz"
-fi
-BASE_URL="https://github.com/$RELEASE_REPO/releases/$RELEASE_PATH"
-URL="$BASE_URL/$TARBALL"
-SUMS_URL="$BASE_URL/SHA256SUMS"
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -46,6 +38,16 @@ node -e "const major = Number(process.versions.node.split('.')[0]); if (major < 
   echo "error: Jo CLI requires Node.js 18 or newer" >&2
   exit 1
 }
+
+if [ "$VERSION" = "latest" ]; then
+  VERSION="$(curl -fsSL "https://api.github.com/repos/$RELEASE_REPO/releases/latest" | node -e "let data=''; process.stdin.on('data', c => data += c); process.stdin.on('end', () => { const release = JSON.parse(data); if (!release.tag_name) process.exit(1); console.log(release.tag_name.replace(/^v/, '')); });")"
+  DISPLAY_VERSION="$VERSION"
+  TARBALL="jo-cli-${VERSION}.tar.gz"
+fi
+
+BASE_URL="https://github.com/$RELEASE_REPO/releases/download/v$VERSION"
+URL="$BASE_URL/$TARBALL"
+SUMS_URL="$BASE_URL/SHA256SUMS"
 
 TMP_DIR="$(mktemp -d 2>/dev/null || mktemp -d -t jo-cli)"
 cleanup() {
