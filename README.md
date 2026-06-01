@@ -7,7 +7,7 @@ Use it to let another coding agent or automation read and write the same context
 ## Install
 
 ```bash
-curl -fsSL https://github.com/jo-inc/jo-cli-releases/releases/latest/download/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/jo-inc/jo-cli-releases/main/install.sh | sh
 ```
 
 Then verify the command is available:
